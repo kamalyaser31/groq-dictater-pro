@@ -1,0 +1,6 @@
+requests==2.33.1
+wxPython==4.2.4
+keyboard==0.13.5
+PyAudio==0.2.14
+pyperclip==1.11.0
+pywin32==311
