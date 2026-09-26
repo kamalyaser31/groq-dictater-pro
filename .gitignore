@@ -1,6 +1,38 @@
+# Byte-compiled / optimized / DLL files
 __pycache__/
+*.py[cod]
+*$py.class
+*.so
+
+# C extensions
+*.obj
+*.lib
+*.dll
+
+# Virtual Environments
 .venv/
+venv/
+env/
+ENV/
+
+# PyInstaller / Build artifacts
 build/
 dist/
+*.egg-info/
+.eggs/
+
+# Runtime data, logs, and sensitive settings
 app.log
 config.json
+*.tmp
+
+# Editors and IDEs
+.idea/
+.vscode/
+*.swp
+*.swo
+
+# Testing and coverage
+.pytest_cache/
+.coverage
+htmlcov/

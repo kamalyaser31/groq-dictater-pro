@@ -1,3 +1,4 @@
+import io
 import json
 import tempfile
 import threading
@@ -84,6 +85,16 @@ class ConfigTests(unittest.TestCase):
                 self.assertEqual(
                     config.load_settings().api_key, "private-api-key"
                 )
+
+    def test_app_data_dir_and_logger_identity(self) -> None:
+        self.assertEqual(config.APP_DATA_DIR.name, "GroqDictaterPro")
+        self.assertEqual(config.log.name, "groq_dictater")
+
+    def test_invalid_model_reverts_to_default(self) -> None:
+        settings = config.settings_from_mapping(
+            {"model_name": "invalid-model"}
+        )
+        self.assertEqual(settings.model_name, config.DEFAULT_MODEL_NAME)
 
 
 class AudioEngineTests(unittest.TestCase):
@@ -206,6 +217,26 @@ class AudioEngineTests(unittest.TestCase):
 
         self.assertTrue(request_completed.is_set())
 
+    def test_build_transcription_payload_contains_expected_fields(
+        self,
+    ) -> None:
+        settings = AppSettings(
+            model_name="whisper-large-v3",
+            language="ar",
+            initial_prompt="فحص صوتي",
+        )
+        buffer = io.BytesIO(b"fake-audio-bytes")
+        headers, files, fields = audio_engine._build_transcription_payload(
+            settings, "gsk_test123", buffer
+        )
+        self.assertEqual(headers["Authorization"], "Bearer gsk_test123")
+        self.assertEqual(fields["model"], "whisper-large-v3")
+        self.assertEqual(fields["language"], "ar")
+        self.assertEqual(fields["prompt"], "فحص صوتي")
+        self.assertIn("file", files)
+        self.assertEqual(files["file"][0], "speech.wav")
+        self.assertEqual(files["file"][2], "audio/wav")
+
 
 class GuiConcurrencyTests(unittest.TestCase):
     def test_hotkey_is_ignored_while_settings_dialog_is_open(self) -> None:
@@ -238,6 +269,28 @@ class GuiConcurrencyTests(unittest.TestCase):
         frame_probe._closing = True
         queued_callbacks[0]()
         callback.assert_not_called()
+
+    def test_toggle_button_label_updates_on_recording_state(self) -> None:
+        frame_probe = SimpleNamespace(
+            settings=AppSettings(hotkey="f8", api_key="valid-key"),
+            _closing=False,
+            _settings_open=False,
+            _st_status=Mock(),
+            _set_status=Mock(),
+            _btn_toggle=Mock(),
+            _btn_settings=Mock(),
+            _beep=Mock(),
+            _engine=Mock(),
+        )
+        frame_probe._engine.start_recording.return_value = True
+
+        gui.DictationFrame._start_recording(frame_probe)
+        frame_probe._btn_toggle.SetLabel.assert_called_with(
+            "إيقاف الإملاء (F8)"
+        )
+
+        gui.DictationFrame._on_transcription_finish(frame_probe, "اكتمل")
+        frame_probe._btn_toggle.SetLabel.assert_called_with("بدء الإملاء (F8)")
 
 
 if __name__ == "__main__":

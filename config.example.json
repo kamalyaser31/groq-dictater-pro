@@ -1,0 +1,10 @@
+{
+    "hotkey": "f8",
+    "api_url": "https://api.groq.com/openai/v1/audio/transcriptions",
+    "model_name": "whisper-large-v3-turbo",
+    "language": "ar",
+    "auto_paste": false,
+    "sound_enabled": true,
+    "stay_on_top": false,
+    "initial_prompt": "اللغة العربية، فصحى، مصطلحات إسلامية، تعليم"
+}

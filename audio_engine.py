@@ -31,6 +31,22 @@ class EngineState(Enum):
     SHUTTING_DOWN = auto()
 
 
+def _build_transcription_payload(
+    settings: AppSettings, api_key: str, buffer: io.BytesIO
+) -> tuple[
+    dict[str, str], dict[str, tuple[str, io.BytesIO, str]], dict[str, str]
+]:
+    headers = {"Authorization": f"Bearer {api_key}"}
+    files = {"file": ("speech.wav", buffer, "audio/wav")}
+    request_fields = {
+        "model": settings.model_name,
+        "language": settings.language,
+    }
+    if settings.initial_prompt.strip():
+        request_fields["prompt"] = settings.initial_prompt.strip()
+    return headers, files, request_fields
+
+
 class AudioEngine:
     """
     يُدير التسجيل الصوتي وإرسال الملف إلى Groq API لتحويل الكلام إلى نص.
@@ -238,19 +254,9 @@ class AudioEngine:
                 "أو عيّن متغير البيئة GROQ_API_KEY."
             )
 
-        headers = {
-            "Authorization": f"Bearer {api_key}",
-        }
-        files = {
-            "file": ("speech.wav", buffer, "audio/wav"),
-        }
-        request_fields = {
-            "model": settings_snapshot.model_name,
-            "language": settings_snapshot.language,
-        }
-        if settings_snapshot.initial_prompt.strip():
-            request_fields["prompt"] = settings_snapshot.initial_prompt.strip()
-
+        headers, files, request_fields = _build_transcription_payload(
+            settings_snapshot, api_key, buffer
+        )
         log.info(
             "إرسال الصوت إلى Groq API [%s] بالنموذج [%s]...",
             settings_snapshot.api_url,
@@ -267,7 +273,7 @@ class AudioEngine:
 
         if response.status_code != 200:
             error_msg = (
-                "فشل طلب Groq API " f"(رمز الاستجابة: {response.status_code})"
+                f"فشل طلب Groq API (رمز الاستجابة: {response.status_code})"
             )
             log.error(error_msg)
             raise RuntimeError(error_msg)

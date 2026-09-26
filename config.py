@@ -26,7 +26,7 @@ BASE_DIR = (
     else Path(__file__).resolve().parent
 )
 APP_DATA_DIR = (
-    Path(os.environ.get("LOCALAPPDATA", BASE_DIR)) / "WhisperDictaterPro"
+    Path(os.environ.get("LOCALAPPDATA", BASE_DIR)) / "GroqDictaterPro"
 )
 LOG_FILE = APP_DATA_DIR / "app.log"
 CONFIG_FILE = BASE_DIR / "config.json"
@@ -41,7 +41,7 @@ _PROTECTED_API_KEY_FIELD = "protected_api_key"
 # ---------------------------------------------------------------------------
 # إعداد نظام السجلات (logging)
 # ---------------------------------------------------------------------------
-log = logging.getLogger("whisper_dictater")
+log = logging.getLogger("groq_dictater")
 log.addHandler(logging.NullHandler())
 _logging_configured = False
 

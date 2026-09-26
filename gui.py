@@ -240,6 +240,7 @@ class DictationFrame(wx.Frame):
         self._text_log = wx.TextCtrl(
             panel, style=wx.TE_MULTILINE | wx.TE_READONLY | wx.TE_RICH2
         )
+        self._text_log.SetName(lbl_history.GetLabel())
         self._text_log.SetDefaultStyle(
             wx.TextAttr(wx.NullColour, alignment=wx.TEXT_ALIGNMENT_RIGHT)
         )
@@ -299,6 +300,9 @@ class DictationFrame(wx.Frame):
             return
         self._beep(1000)
         self._set_status("جارٍ التسجيل...", colour=wx.RED)
+        self._btn_toggle.SetLabel(
+            f"إيقاف الإملاء ({self.settings.hotkey.upper()})"
+        )
         self._btn_toggle.SetBackgroundColour(wx.Colour(200, 0, 0))
         self._btn_settings.Disable()
 
@@ -329,6 +333,9 @@ class DictationFrame(wx.Frame):
 
     def _on_capture_error(self, _exc: Exception) -> None:
         self._set_status("انقطع التقاط الصوت", colour=wx.RED)
+        self._btn_toggle.SetLabel(
+            f"بدء الإملاء ({self.settings.hotkey.upper()})"
+        )
         self._btn_toggle.SetBackgroundColour(wx.Colour(0, 150, 0))
         self._btn_toggle.Enable()
         self._btn_settings.Enable()
@@ -377,6 +384,9 @@ class DictationFrame(wx.Frame):
     ) -> None:
         """تُعيد تفعيل الواجهة بعد انتهاء المعالجة."""
         self._set_status(status_text, colour=colour)
+        self._btn_toggle.SetLabel(
+            f"بدء الإملاء ({self.settings.hotkey.upper()})"
+        )
         self._btn_toggle.Enable()
         self._btn_settings.Enable()
 
@@ -450,7 +460,7 @@ class DictationFrame(wx.Frame):
 
         self._remove_hotkey()
         self._hotkey_hook = new_hotkey_hook
-        self._btn_toggle.SetLabel(f"بدء/إيقاف الإملاء ({hotkey.upper()})")
+        self._btn_toggle.SetLabel(f"بدء الإملاء ({hotkey.upper()})")
         return True
 
     def _remove_hotkey(self) -> None:
